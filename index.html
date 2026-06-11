@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="only light">
+    <title>Sistema de Consulta de Leyes de Colombia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            margin: 0;
+            padding: 15px;
+            color: #e0e0e0;
+        }
+        .contenedor-encabezado {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo-policia {
+            width: 90px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 22px;
+            margin: 5px 0;
+        }
+        .subtitulo {
+            color: #aaaaaa;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        .contenedor-buscador {
+            margin: 15px 0;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #333333;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        input[type="text"]:focus {
+            border-color: #0288d1;
+            outline: none;
+        }
+        .tarjeta-ley {
+            background: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            border-left: 4px solid #0288d1;
+        }
+        .categoria-ley {
+            display: inline-block;
+            background: #002f4c;
+            color: #29b6f6;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .titulo-ley {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            margin: 8px 0 5px 0;
+        }
+        .texto-ley {
+            font-size: 14px;
+            color: #cccccc;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="contenedor-encabezado">
+        <img src="logo.png" alt="Logo Policía Nacional" class="logo-policia">
+        <h1>Sistema Nacional de Consulta de Leyes</h1>
+        <div class="subtitulo">República de Colombia - Base de datos interactiva</div>
+    </div>
+
+    <div class="contenedor-buscador">
+        <input type="text" id="campoBuscador" placeholder="Buscar por palabra clave (ej: ruido, mascota)..." oninput="filtrarLeyes()">
+    </div>
+
+    <div id="contenedorListaLeyes"></div>
+
+    <script>
+        const baseDeDatosLeyes = [
+            {
+                        "id": 1,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 1 (Objeto del Código)",
+                        "textolargo": "Regula los comportamientos humanos para asegurar la convivencia pacífica en Colombia."
+            },
+            {
+                        "id": 2,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 2 (Objetivos específicos)",
+                        "textolargo": "Busca promover el respeto, la tolerancia y resolver conflictos de forma pacífica."
+            },
+            {
+                        "id": 3,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 3 (Ámbito de aplicación)",
+                        "textolargo": "Se aplica a todas las personas naturales y jurídicas en el territorio nacional."
+            },
+            {
+                        "id": 4,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 4 (Naturaleza preventiva)",
+                        "textolargo": "Las normas de convivencia son preventivas y se aplican inmediatamente sin perjuicio de otras leyes."
+            },
+            {
+                        "id": 5,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 5 (Definición de Convivencia)",
+                        "textolargo": "Es la interacción pacífica, armónica y respetuosa entre personas, bienes y ambiente."
+            },
+            {
+                        "id": 6,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 6 (Categorías jurídicas)",
+                        "textolargo": "Garantiza la seguridad, la tranquilidad, el ambiente sano y la salud pública."
+            },
+            {
+                        "id": 7,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 7 (Cuidado de la diversidad)",
+                        "textolargo": "Las normas deben aplicarse respetando las diferencias culturales, de género y de etnia."
+            },
+            {
+                        "id": 8,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 8 (Principios fundamentales)",
+                        "textolargo": "Protección de la vida, dignidad humana, proporcionalidad y solidaridad."
+            },
+            {
+                        "id": 9,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 9 (Poder de policía)",
+                        "textolargo": "Facultad de dictar normas generales para regular el comportamiento ciudadano."
+            },
+            {
+                        "id": 10,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 10 (Deberes de las autoridades)",
+                        "textolargo": "Deben actuar con imparcialidad, respeto a los derechos humanos y proteger a todos."
+            },
+            {
+                        "id": 11,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 11 (Función de Policía)",
+                        "textolargo": "Gestión diaria de las autoridades para cumplir las normas preventivas."
+            },
+            {
+                        "id": 12,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 12 (Autoridades de policía y atribuciones de la alcaldía)",
+                        "textolargo": "El alcalde es la primera autoridad de policía en el municipio y debe garantizar el orden."
+            },
+            {
+                        "id": 13,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 13 (Autoridades administrativas ordinarias)",
+                        "textolargo": "Las autoridades administrativas deben promover políticas públicas para asegurar la convivencia."
+            },
+            {
+                        "id": 14,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 14 (Personal uniformado de la policía)",
+                        "textolargo": "El personal uniformado de la Policía Nacional ejerce sus funciones con respeto a los derechos."
+            },
+            {
+                        "id": 15,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 15 (Órdenes de Policía escritas)",
+                        "textolargo": "Las órdenes son medidas preventivas que buscan evitar la alteración de la convivencia."
+            },
+            {
+                        "id": 16,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 16 (Autoridades de Policía de carácter nacional)",
+                        "textolargo": "Son autoridades de Policía de carácter nacional el Presidente de la República y el Ministro de Defensa."
+            },
+            {
+                        "id": 17,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 17 (Autoridades de Policía de carácter distrital o municipal)",
+                        "textolargo": "Son autoridades de Policía en este nivel el alcalde distrital o municipal y los inspectores."
+            },
+            {
+                        "id": 18,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 18 (Autoridades de Policía de carácter especial)",
+                        "textolargo": "Son autoridades de Policía de carácter especial aquellas que tienen funciones específicas."
+            },
+            {
+                        "id": 19,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 19 (Otras autoridades de auxilio)",
+                        "textolargo": "Cualquier otra autoridad que determine la ley ejercerá funciones de Policía para la convivencia."
+            },
+            {
+                        "id": 20,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 20 (Funciones del Presidente de la República)",
+                        "textolargo": "El Presidente de la República ejerce la suprema autoridad administrativa para la convivencia."
+            },
+            {
+                        "id": 21,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 21 (Función de la Policía)",
+                        "textolargo": "Consiste en la gestión o actividad diaria que realizan las autoridades para hacer cumplir las normas."
+            },
+            {
+                        "id": 22,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 22 (Actividad de Policía)",
+                        "textolargo": "Es la ejecución material del servicio de policía que realizan los uniformados."
+            },
+            {
+                        "id": 23,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 23 (Uso reglamentario de la fuerza)",
+                        "textolargo": "El uso de la fuerza por parte de la policía es el último recurso disponible."
+            },
+            {
+                        "id": 24,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 24 (Deberes del Personal Uniformado)",
+                        "textolargo": "Los policías en servicio deben portar su uniforme correctamente e identificarse."
+            },
+            {
+                        "id": 25,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 25 (Comportamientos que afectan la seguridad)",
+                        "textolargo": "Detalla las conductas prohibidas que ponen en riesgo la seguridad de las personas."
+            },
+            {
+                        "id": 26,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 26 (Medidas preventivas en eventos)",
+                        "textolargo": "Establece los requisitos mínimos de seguridad que se deben cumplir en espectáculos públicos."
+            },
+            {
+                        "id": 27,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 27 (Riñas y peleas)",
+                        "textolargo": "Prohíbe reñir, incitar a confrontaciones o agredir físicamente en público."
+            },
+            {
+                        "id": 28,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 28 (Cuidado del Espacio Público)",
+                        "textolargo": "Todas las personas tienen el deber de preservar el mobiliario urbano, andenes y plazas."
+            },
+            {
+                        "id": 29,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 29 (Límites a la Actividad Comercial)",
+                        "textolargo": "Los establecimientos de comercio deben cumplir estrictamente con los horarios establecidos."
+            },
+            {
+                        "id": 30,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 30 (Pólvora y fuegos artificiales)",
+                        "textolargo": "Prohíbe fabricar, tener o prender pólvora sin los permisos de las autoridades."
+            },
+            {
+                        "id": 31,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 31 (Medidas de Convivencia)",
+                        "textolargo": "Define las acciones inmediatas que las autoridades locales pueden tomar ante peligros."
+            },
+            {
+                        "id": 32,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 32 (Exclusión de medidas)",
+                        "textolargo": "No se podrán aplicar medidas correctivas si el comportamiento no está tipificado."
+            },
+            {
+                        "id": 33,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 33 (Ruido excesivo)",
+                        "textolargo": "Controla sonidos o música alta en fiestas y casas que afecten la tranquilidad del vecindario."
+            },
+            {
+                        "id": 34,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 34 (Bienes de uso público)",
+                        "textolargo": "Establece las reglas para usar de forma correcta los parques y ciclorrutas."
+            },
+            {
+                        "id": 35,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 35 (Respeto a las autoridades de policía)",
+                        "textolargo": "Pide colaborar con los uniformados y prohíbe agredir o irrespetar sus órdenes."
+            },
+            {
+                        "id": 36,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 36 (Lugares abiertos al público)",
+                        "textolargo": "Regula el comportamiento dentro de tiendas y centros comerciales."
+            },
+            {
+                        "id": 37,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 37 (Encuentros deportivos)",
+                        "textolargo": "Regula la convivencia en estadios de fútbol para evitar barras bravas violentas."
+            },
+            {
+                        "id": 38,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 38 (Comportamientos en establecimientos educativos)",
+                        "textolargo": "Prohíbe el consumo o venta de cualquier sustancia ilícita o licor cerca de colegios."
+            },
+            {
+                        "id": 39,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 39 (Protección de la infancia en internet)",
+                        "textolargo": "Obliga a las salas de internet a colocar filtros bloqueadores para menores."
+            },
+            {
+                        "id": 40,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 40 (Uso adecuado de la tecnología)",
+                        "textolargo": "Señala el buen uso de los dispositivos electrónicos en el espacio público."
+            },
+            {
+                        "id": 41,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 41 (Seguridad en conjuntos residenciales)",
+                        "textolargo": "Promueve el respeto a los reglamentos de propiedad horizontal y la tranquilidad."
+            },
+            {
+                        "id": 42,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 42 (Atribuciones de la Alcaldía y Convivencia)",
+                        "textolargo": "Permite a los alcaldes regular temporalmente los horarios de establecimientos."
+            },
+            {
+                        "id": 43,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 43 (Prevención de incendios)",
+                        "textolargo": "Prohíbe realizar quemas de basura o fogatas improvisadas que puedan salirse de control."
+            },
+            {
+                        "id": 44,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 44 (Uso del suelo urbano)",
+                        "textolargo": "Exige que las actividades comerciales cuenten con la licencia de funcionamiento correcta."
+            },
+            {
+                        "id": 45,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 45 (Control de pesas y medidas)",
+                        "textolargo": "Obliga a las tiendas y mercados a usar balanzas bien calibradas."
+            },
+            {
+                        "id": 46,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 46 (Espectáculos pirotécnicos autorizados)",
+                        "textolargo": "Los eventos con luces pirotécnicas masivas deben ser manejados únicamente por expertos."
+            },
+            {
+                        "id": 47,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 47 (Hoteles y hospedajes)",
+                        "textolargo": "Deben registrar la cédula de todos los huéspedes de forma obligatoria."
+            },
+            {
+                        "id": 48,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 48 (Protección de los recursos arqueológicos)",
+                        "textolargo": "Castiga el saqueo, comercialización ilegal o daño a los monumentos históricos."
+            },
+            {
+                        "id": 49,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 49 (Salubridad pública en plazas de mercado)",
+                        "textolargo": "Exige el cumplimiento de rigurosos controles sanitarios para alimentos."
+            },
+            {
+                        "id": 50,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 50 (Venta de celulares)",
+                        "textolargo": "Obliga a registrar el IMEI para evitar la comercialización de teléfonos robados."
+            },
+            {
+                        "id": 51,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 51 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 52,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 52 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 53,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 53 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 54,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 54 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 55,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 55 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 56,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 56 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 57,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 57 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 58,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 58 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 59,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 59 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 60,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 60 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 61,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 61 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 62,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 62 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 63,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 63 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 64,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 64 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 65,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 65 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 66,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 66 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 67,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 67 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 68,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 68 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 69,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 69 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 70,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 70 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 71,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 71 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 72,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 72 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 73,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 73 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 74,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 74 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 75,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 75 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 76,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 76 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 77,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 77 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 78,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 78 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 79,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 79 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 80,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 80 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 81,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 81 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 82,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 82 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 83,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 83 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 84,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 84 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 85,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 85 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 86,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 86 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 87,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 87 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 88,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 88 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 89,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 89 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 90,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 90 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 91,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 91 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 92,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 92 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 93,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 93 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 94,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 94 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 95,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 95 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 96,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 96 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 97,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 97 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 98,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 98 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 99,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 99 (Protección Ciudadana y Convivencia)",
+                        "textolargo": "Establece pautas generales para cuidar los derechos colectivos, el bienestar de la comunidad y la seguridad urbana."
+            },
+            {
+                        "id": 100,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 100 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 101,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 101 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 102,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 102 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 103,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 103 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 104,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 104 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 105,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 105 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 106,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 106 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 107,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 107 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 108,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 108 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 109,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 109 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 110,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 110 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 111,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 111 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 112,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 112 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 113,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 113 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 114,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 114 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 115,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 115 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 116,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 116 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 117,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 117 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 118,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 118 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 119,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 119 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 120,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 120 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 121,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 121 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 122,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 122 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 123,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 123 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 124,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 124 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 125,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 125 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 126,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 126 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 127,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 127 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 128,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 128 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 129,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 129 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 130,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 130 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 131,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 131 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 132,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 132 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 133,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 133 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 134,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 134 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 135,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 135 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 136,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 136 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 137,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 137 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 138,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 138 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 139,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 139 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 140,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 140 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 141,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 141 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 142,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 142 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 143,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 143 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 144,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 144 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 145,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 145 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 146,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 146 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 147,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 147 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 148,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 148 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 149,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 149 (Espacio Público y Cuidado Ambiental)",
+                        "textolargo": "Regula las conductas correctas para no arrojar basuras, proteger las fuentes de agua y cuidar los árboles."
+            },
+            {
+                        "id": 150,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 150 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 151,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 151 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 152,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 152 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 153,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 153 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 154,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 154 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 155,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 155 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 156,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 156 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 157,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 157 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 158,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 158 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 159,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 159 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 160,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 160 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 161,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 161 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 162,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 162 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 163,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 163 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 164,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 164 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 165,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 165 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 166,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 166 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 167,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 167 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 168,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 168 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 169,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 169 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 170,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 170 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 171,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 171 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 172,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 172 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 173,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 173 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 174,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 174 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 175,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 175 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 176,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 176 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 177,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 177 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 178,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 178 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 179,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 179 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 180,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 180 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 181,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 181 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 182,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 182 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 183,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 183 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 184,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 184 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 185,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 185 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 186,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 186 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 187,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 187 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 188,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 188 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 189,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 189 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 190,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 190 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 191,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 191 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 192,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 192 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 193,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 193 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 194,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 194 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 195,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 195 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 196,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 196 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 197,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 197 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 198,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 198 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 199,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 199 (Autoridades, Inspecciones y Procedimientos)",
+                        "textolargo": "Determina cómo deben actuar los inspectores de policía y alcaldes para resolver quejas vecinales de manera justa."
+            },
+            {
+                        "id": 200,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 200 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 201,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 201 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 202,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 202 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 203,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 203 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 204,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 204 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 205,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 205 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 206,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 206 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 207,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 207 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 208,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 208 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 209,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 209 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 210,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 210 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 211,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 211 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 212,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 212 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 213,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 213 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 214,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 214 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 215,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 215 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 216,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 216 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 217,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 217 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 218,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 218 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 219,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 219 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 220,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 220 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 221,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 221 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 222,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 222 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 223,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 223 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 224,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 224 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 225,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 225 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 226,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 226 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 227,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 227 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 228,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 228 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 229,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 229 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 230,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 230 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 231,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 231 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 232,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 232 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 233,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 233 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 234,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 234 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 235,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 235 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 236,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 236 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 237,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 237 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 238,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 238 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 239,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 239 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 240,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 240 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 241,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 241 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 242,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 242 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 243,
+                        "categoria": "Policía y Convivencia",
+                        "titulo": "Ley 1801 de 2016 - Artículo 243 (Medidas Correctivas y Comparendos)",
+                        "textolargo": "Explica el funcionamiento de los comparendos, las multas pedagógicas y el proceso para apelar ante la alcaldía."
+            },
+            {
+                        "id": 244,
+                        "categoria": "Infancia y Adolescencia",
+                        "titulo": "Ley 2089 de 2021 - Artículo 1 (Prohibición del castigo físico)",
+                        "textolargo": "Prohíbe el uso del castigo físico, los correazos, cachetadas o cualquier tipo de violencia como método de crianza o educación para los niños y niñas."
+            }
+];
+
+        function mostrarLeyesEnPantalla(listaDeLeyes) {
+            const contenedorHTML = document.getElementById('contenedorListaLeyes');
+            contenedorHTML.innerHTML = '';
+
+            if (listaDeLeyes.length === 0) {
+                contenedorHTML.innerHTML = '<p style="text-align:center; color:#95a5a6;">No se encontraron resultados.</p>';
+                return;
+            }
+
+            listaDeLeyes.forEach(ley => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = 'tarjeta-ley';
+                tarjeta.innerHTML = `
+                    <span class="categoria-ley">${ley.categoria}</span>
+                    <div class="titulo-ley">${ley.titulo}</div>
+                    <div class="texto-ley">${ley.textolargo}</div>
+                `;
+                contenedorHTML.appendChild(tarjeta);
+            });
+        }
+
+        window.onload = function() {
+            mostrarLeyesEnPantalla(baseDeDatosLeyes);
+        };
+
+        function filtrarLeyes() {
+            const textoBusqueda = document.getElementById('campoBuscador').value.toLowerCase().trim();
+            
+            const leyesFiltradas = baseDeDatosLeyes.filter(ley => {
+                return ley.titulo.toLowerCase().includes(textoBusqueda) || 
+                       ley.categoria.toLowerCase().includes(textoBusqueda) || 
+                       ley.textolargo.toLowerCase().includes(textoBusqueda);
+            });
+
+            mostrarLeyesEnPantalla(leyesFiltradas);
+        }
+    </script>
+</body>
+</html>
